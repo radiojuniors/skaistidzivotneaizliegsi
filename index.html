@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skaisti Dzīvot Neaizliegsi — Galaktik</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Oswald:wght@600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #E9D0BA;
+      --cream-dark: #D4B89E;
+      --red: #B8301E;
+      --ink: #1C1008;
+      --ink-faded: #1C100880;
+      --stamp-red: #B8421A;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--cream);
+    }
+
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Paper grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 480px;
+      padding: 52px 36px 80px;
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+    }
+
+    /* Top quote */
+    .top-quote {
+      font-family: 'EB Garamond', serif;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-faded);
+      text-align: right;
+      margin-bottom: 18px;
+      font-style: italic;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 44px;
+    }
+
+    .album-title {
+      /* width: 75%;
+      height: auto; */
+      margin-bottom: 4px;
+    }
+
+    .artist-name {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(30px, 9vw, 48px);
+      color: var(--ink);
+      line-height: 1.1;
+      margin-left: 2px;
+    }
+
+    /* Divider */
+    .divider {
+      width: 100%;
+      height: 0.5px;
+      background: var(--ink);
+      opacity: 0.2;
+      margin: 28px 0;
+    }
+
+    /* Now playing label */
+    .now-playing-label {
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-faded);
+      margin-bottom: 14px;
+    }
+
+    /* Active track */
+    .track-active {
+      margin-bottom: 10px;
+    }
+
+    .track-active .track-num {
+      font-family: 'EB Garamond', serif;
+      font-size: 13px;
+      color: var(--ink-faded);
+    }
+
+    .track-active .track-name {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      line-height: 1.1;
+      margin-top: 2px;
+    }
+
+    .track-active .track-feat {
+      font-family: 'EB Garamond', serif;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faded);
+      margin-top: 4px;
+    }
+
+    /* Custom audio player */
+    .player {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .play-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .play-btn:hover {
+      background: var(--ink);
+    }
+
+    .play-btn:hover svg path {
+      fill: var(--cream);
+    }
+
+    .play-btn svg {
+      width: 12px;
+      height: 12px;
+      margin-left: 2px;
+    }
+
+    .play-btn svg path {
+      fill: var(--ink);
+      transition: fill 0.15s;
+    }
+
+    .play-btn.playing svg {
+      margin-left: 0;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 1px;
+      background: rgba(28, 16, 8, 0.2);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--ink);
+      width: 0%;
+      transition: width 0.1s linear;
+      pointer-events: none;
+    }
+
+    .progress-bar-thumb {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ink);
+      left: 0%;
+      transition: left 0.1s linear;
+      pointer-events: none;
+    }
+
+    .time-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .time-row span {
+      font-family: 'EB Garamond', serif;
+      font-size: 11px;
+      color: var(--ink-faded);
+      letter-spacing: 0.06em;
+    }
+
+    /* Hidden audio */
+    #audio { display: none; }
+
+    /* Locked tracks */
+    .tracks-locked {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .track-locked {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 0.5px solid rgba(28, 16, 8, 0.15);
+      opacity: 0.45;
+    }
+
+    .track-locked:last-child {
+      border-bottom: none;
+    }
+
+    .track-locked-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .track-locked .track-num {
+      font-family: 'EB Garamond', serif;
+      font-size: 12px;
+      color: var(--ink-faded);
+      min-width: 14px;
+      margin-top: 2px;
+    }
+
+    .track-locked .track-name {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .track-locked .track-feat {
+      font-family: 'EB Garamond', serif;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-faded);
+      margin-top: 3px;
+    }
+
+    .lock-icon {
+      opacity: 0.3;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Stamp decoration */
+    .stamp-wrap {
+      position: relative;
+      margin-top: 56px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .stamp {
+      width: 40%;
+      /* opacity: 0.85;
+      transform: rotate(6deg); */
+    }
+
+    .stamp-postmark {
+      position: absolute;
+      bottom: -12px;
+      right: 42px;
+      width: 64px;
+      opacity: 0.4;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 48px;
+      border-top: 0.5px solid rgba(28, 16, 8, 0.15);
+      padding-top: 20px;
+    }
+
+    .footer p {
+      font-family: 'EB Garamond', serif;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faded);
+      line-height: 1.8;
+    }
+
+    .footer .copyright {
+      margin-top: 8px;
+    }
+
+    .footer .copyright strong {
+      font-weight: 500;
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header { animation: fadeUp 0.6s ease both; }
+    .now-playing-label { animation: fadeUp 0.6s 0.1s ease both; }
+    .track-active { animation: fadeUp 0.6s 0.15s ease both; }
+    .player { animation: fadeUp 0.6s 0.2s ease both; }
+    .divider { animation: fadeUp 0.6s 0.25s ease both; }
+    .tracks-locked { animation: fadeUp 0.6s 0.3s ease both; }
+    .stamp-wrap { animation: fadeUp 0.6s 0.4s ease both; }
+    .footer { animation: fadeUp 0.6s 0.5s ease both; }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- <div class="top-quote">"Ko bildes nespēj, pateiks skaņas viļņi"</div> -->
+
+    <header class="header">
+      <img class="album-title" src="assets/title.png" alt="Skaisti Dzīvot Neaizliegsi by Galaktik" style="max-width: 100%; height: auto;">
+    </header>
+
+    <div class="divider"></div>
+
+    <div class="now-playing-label">1. Pieejams tagad</div>
+
+    <div class="track-active">
+      <div class="track-name" style="font-family:'Oswald',sans-serif;font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink);line-height:1.1;">Taimings</div>
+      <div class="track-feat" style="font-family:'EB Garamond',serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faded);margin-top:5px;">feat. F6LEX</div>
+
+      <div class="player">
+        <audio id="audio" preload="metadata">
+          <!-- Replace src below with your actual MP3 file path, e.g. src="taimings.mp3" -->
+          <source src="assets/taimings.mp3">
+        </audio>
+
+        <div class="player-controls">
+          <button class="play-btn" id="playBtn" aria-label="Play">
+            <svg viewBox="0 0 12 14" fill="none">
+              <path id="playIcon" d="M1 1L11 7L1 13V1Z"/>
+            </svg>
+          </button>
+
+          <div class="progress-wrap">
+            <div class="progress-bar-track" id="progressTrack">
+              <div class="progress-bar-fill" id="progressFill"></div>
+              <div class="progress-bar-thumb" id="progressThumb"></div>
+            </div>
+            <div class="time-row">
+              <span id="currentTime">0:00</span>
+              <span id="duration">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="tracks-locked">
+
+      <div class="track-locked">
+        <div class="track-locked-left">
+          <span class="track-num">2.</span>
+          <div>
+            <div class="track-name">Prieka Asaras</div>
+            <div class="track-feat">feat. Wiesulis &amp; Xantikvariāts</div>
+          </div>
+        </div>
+        <svg class="lock-icon" width="12" height="14" viewBox="0 0 12 14" fill="none">
+          <rect x="1" y="6" width="10" height="7" rx="1.5" stroke="#1C1008" stroke-width="1"/>
+          <path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#1C1008" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <div class="track-locked">
+        <div class="track-locked-left">
+          <span class="track-num">3.</span>
+          <div>
+            <div class="track-name">Pilnīgs Neprāts</div>
+            <div class="track-feat">feat. Galeniex &amp; Marko</div>
+          </div>
+        </div>
+        <svg class="lock-icon" width="12" height="14" viewBox="0 0 12 14" fill="none">
+          <rect x="1" y="6" width="10" height="7" rx="1.5" stroke="#1C1008" stroke-width="1"/>
+          <path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#1C1008" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <div class="track-locked">
+        <div class="track-locked-left">
+          <span class="track-num">4.</span>
+          <div>
+            <div class="track-name">Miegamice Freestyle</div>
+            <div class="track-feat">feat. ODS</div>
+          </div>
+        </div>
+        <svg class="lock-icon" width="12" height="14" viewBox="0 0 12 14" fill="none">
+          <rect x="1" y="6" width="10" height="7" rx="1.5" stroke="#1C1008" stroke-width="1"/>
+          <path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#1C1008" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <div class="track-locked">
+        <div class="track-locked-left">
+          <span class="track-num">5.</span>
+          <div>
+            <div class="track-name">Skaisti Dzīvot Neaizliegsi</div>
+            <div class="track-feat">feat. Marko &amp; Ozols</div>
+          </div>
+        </div>
+        <svg class="lock-icon" width="12" height="14" viewBox="0 0 12 14" fill="none">
+          <rect x="1" y="6" width="10" height="7" rx="1.5" stroke="#1C1008" stroke-width="1"/>
+          <path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#1C1008" stroke-width="1"/>
+        </svg>
+      </div>
+
+    </div>
+
+    <!-- Vintage stamp decoration -->
+    <div class="stamp-wrap">
+      <img class="stamp" src="assets/stamp.png" alt="Vintage Stamp">
+    </div>
+
+    <footer class="footer">
+      <p>Produced, recorded, mixed &amp; mastered by Galaktik.<br>
+      Visuals by Galaktik, Elgrounde, Radio &amp; Marko.</p>
+      <p class="copyright"><strong>© 2026 Galaktik. All rights reserved.</strong> To be listened to in its entirety.</p>
+    </footer>
+
+  </div>
+
+  <script>
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const progressFill = document.getElementById('progressFill');
+    const progressThumb = document.getElementById('progressThumb');
+    const progressTrack = document.getElementById('progressTrack');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+
+    const pausePathD = "M2 1H5V13H2V1ZM7 1H10V13H7V1Z";
+    const playPathD = "M1 1L11 7L1 13V1Z";
+
+    let playing = false;
+
+    function fmt(s) {
+      if (isNaN(s)) return '—';
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (playing) {
+        audio.pause();
+        playIcon.setAttribute('d', playPathD);
+        playing = false;
+      } else {
+        audio.play().catch(() => {});
+        playIcon.setAttribute('d', pausePathD);
+        playing = true;
+      }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      if (!audio.duration) return;
+      const pct = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = pct + '%';
+      progressThumb.style.left = pct + '%';
+      currentTimeEl.textContent = fmt(audio.currentTime);
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      durationEl.textContent = fmt(audio.duration);
+    });
+
+    audio.addEventListener('ended', () => {
+      playIcon.setAttribute('d', playPathD);
+      playing = false;
+      progressFill.style.width = '0%';
+      progressThumb.style.left = '0%';
+      currentTimeEl.textContent = '0:00';
+    });
+
+    progressTrack.addEventListener('click', (e) => {
+      const rect = progressTrack.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = pct * audio.duration;
+    });
+  </script>
+</body>
+</html>
