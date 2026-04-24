@@ -34,8 +34,8 @@
       overflow-x: hidden;
     }
 
-    /* Paper grain overlay */
-    body::before {
+    /* Paper grain overlay — only on album view */
+    body.view-album::before {
       content: '';
       position: fixed;
       inset: 0;
@@ -45,16 +45,106 @@
       z-index: 1;
     }
 
+    body.view-vhs {
+      background: #0a0a0a;
+    }
+
+    /* ──────────────────────────────────────────
+       VIEW SWITCHER
+    ────────────────────────────────────────── */
+    .view-switcher {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 36px 0;
+      gap: 0;
+    }
+
+    .view-switcher button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-faded);
+      padding: 6px 14px 8px;
+      position: relative;
+      transition: color 0.2s;
+    }
+    
+    @media (min-width: 768px) {
+      .view-switcher button {
+        font-size: 13px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .view-switcher button {
+        font-size: 15px;
+      }
+    }
+
+    .view-switcher button::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 14px;
+      right: 14px;
+      height: 1px;
+      background: var(--ink);
+      transform: scaleX(0);
+      transition: transform 0.2s ease;
+    }
+
+    .view-switcher button.active {
+      color: var(--ink);
+    }
+
+    .view-switcher button.active::after {
+      transform: scaleX(1);
+    }
+
+    .view-switcher .sep {
+      font-family: 'EB Garamond', serif;
+      font-size: 11px;
+      color: var(--ink-faded);
+      opacity: 0.4;
+      user-select: none;
+    }
+
+    /* VHS mode switcher overrides */
+    body.view-vhs .view-switcher button {
+      color: rgba(255,255,255,0.3);
+    }
+    body.view-vhs .view-switcher button.active {
+      color: rgba(255,255,255,0.85);
+    }
+    body.view-vhs .view-switcher button::after {
+      background: rgba(255,255,255,0.7);
+    }
+    body.view-vhs .view-switcher .sep {
+      color: rgba(255,255,255,0.2);
+    }
+
+    /* ──────────────────────────────────────────
+       ALBUM VIEW
+    ────────────────────────────────────────── */
     .page {
       width: 100%;
       max-width: 480px;
-      padding: 52px 36px 80px;
+      padding: 32px 36px 80px;
       position: relative;
       z-index: 2;
-      min-height: 100vh;
+      min-height: calc(100vh - 52px);
     }
 
-    /* Top quote */
     .top-quote {
       font-family: 'EB Garamond', serif;
       font-size: 9px;
@@ -66,16 +156,7 @@
       font-style: italic;
     }
 
-    /* Header */
-    .header {
-      margin-bottom: 44px;
-    }
-
-    .album-title {
-      /* width: 75%;
-      height: auto; */
-      margin-bottom: 4px;
-    }
+    .header { margin-bottom: 44px; }
 
     .artist-name {
       font-family: 'Great Vibes', cursive;
@@ -85,7 +166,6 @@
       margin-left: 2px;
     }
 
-    /* Divider */
     .divider {
       width: 100%;
       height: 0.5px;
@@ -94,7 +174,6 @@
       margin: 28px 0;
     }
 
-    /* Now playing label */
     .now-playing-label {
       font-size: 9px;
       letter-spacing: 0.15em;
@@ -103,16 +182,7 @@
       margin-bottom: 14px;
     }
 
-    /* Active track */
-    .track-active {
-      margin-bottom: 10px;
-    }
-
-    .track-active .track-num {
-      font-family: 'EB Garamond', serif;
-      font-size: 13px;
-      color: var(--ink-faded);
-    }
+    .track-active { margin-bottom: 10px; }
 
     .track-active .track-name {
       font-family: 'Oswald', sans-serif;
@@ -134,7 +204,6 @@
       margin-top: 4px;
     }
 
-    /* Custom audio player */
     .player {
       margin-top: 18px;
       display: flex;
@@ -162,13 +231,8 @@
       transition: background 0.15s, color 0.15s;
     }
 
-    .play-btn:hover {
-      background: var(--ink);
-    }
-
-    .play-btn:hover svg path {
-      fill: var(--cream);
-    }
+    .play-btn:hover { background: var(--ink); }
+    .play-btn:hover svg path { fill: var(--cream); }
 
     .play-btn svg {
       width: 12px;
@@ -176,16 +240,9 @@
       margin-left: 2px;
     }
 
-    .play-btn svg path {
-      fill: var(--ink);
-      transition: fill 0.15s;
-    }
+    .play-btn svg path { fill: var(--ink); transition: fill 0.15s; }
+    .play-btn.playing svg { margin-left: 0; }
 
-    .play-btn.playing svg {
-      margin-left: 0;
-    }
-
-    /* Progress bar */
     .progress-wrap {
       flex: 1;
       display: flex;
@@ -222,6 +279,19 @@
       pointer-events: none;
     }
 
+    .vhs-cell video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      filter: saturate(0.85) contrast(1.1) brightness(0.9);
+    }
+
     .time-row {
       display: flex;
       justify-content: space-between;
@@ -234,14 +304,9 @@
       letter-spacing: 0.06em;
     }
 
-    /* Hidden audio */
     #audio { display: none; }
 
-    /* Locked tracks */
-    .tracks-locked {
-      display: flex;
-      flex-direction: column;
-    }
+    .tracks-locked { display: flex; flex-direction: column; }
 
     .track-locked {
       display: flex;
@@ -252,9 +317,7 @@
       opacity: 0.45;
     }
 
-    .track-locked:last-child {
-      border-bottom: none;
-    }
+    .track-locked:last-child { border-bottom: none; }
 
     .track-locked-left {
       display: flex;
@@ -295,7 +358,6 @@
       margin-top: 2px;
     }
 
-    /* Stamp decoration */
     .stamp-wrap {
       position: relative;
       margin-top: 56px;
@@ -303,21 +365,8 @@
       justify-content: flex-end;
     }
 
-    .stamp {
-      width: 40%;
-      /* opacity: 0.85;
-      transform: rotate(6deg); */
-    }
+    .stamp { width: 40%; }
 
-    .stamp-postmark {
-      position: absolute;
-      bottom: -12px;
-      right: 42px;
-      width: 64px;
-      opacity: 0.4;
-    }
-
-    /* Footer */
     .footer {
       margin-top: 48px;
       border-top: 0.5px solid rgba(28, 16, 8, 0.15);
@@ -333,34 +382,339 @@
       line-height: 1.8;
     }
 
-    .footer .copyright {
-      margin-top: 8px;
+    .footer .copyright { margin-top: 8px; }
+    .footer .copyright strong { font-weight: 500; }
+
+    /* ──────────────────────────────────────────
+       VHS COLLAGE VIEW
+    ────────────────────────────────────────── */
+    .vhs-view {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px 16px 80px;
+      position: relative;
+      z-index: 2;
+      min-height: calc(100vh - 52px);
     }
 
-    .footer .copyright strong {
-      font-weight: 500;
+    @media (min-width: 768px) {
+      .vhs-view {
+        max-width: 900px;
+        padding: 32px 24px 80px;
+      }
     }
 
-    /* Fade-in animation */
+    @media (min-width: 1200px) {
+      .vhs-view {
+        max-width: 1100px;
+        padding: 40px 32px 80px;
+      }
+    }
+
+    /* Global CRT scanlines over whole VHS view */
+    .vhs-view::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.04) 3px,
+        rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* VHS view header */
+    .vhs-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 0 4px;
+    }
+
+    .vhs-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+    }
+
+    @media (min-width: 768px) {
+      .vhs-label {
+        font-size: 9px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .vhs-label {
+        font-size: 12px;
+      }
+    }
+
+    .vhs-rec {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #cc2200;
+    }
+
+    .vhs-rec-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #cc2200;
+      animation: recBlink 1.4s ease-in-out infinite;
+    }
+
+    @keyframes recBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.1; }
+    }
+
+    /* The collage grid */
+    .vhs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    /* A GIF cell spans 2 cols for the "hero" slot */
+    .vhs-cell {
+      position: relative;
+      overflow: hidden;
+      background: #111;
+      cursor: default;
+    }
+
+    /* Aspect ratios */
+    .vhs-cell.ratio-4x3::before { content: ''; display: block; padding-top: 75%; }
+    .vhs-cell.ratio-wide::before { content: ''; display: block; padding-top: 56.25%; }
+    .vhs-cell.ratio-square::before { content: ''; display: block; padding-top: 100%; }
+    .vhs-cell.ratio-tall::before { content: ''; display: block; padding-top: 130%; }
+    .vhs-cell.span2 { grid-column: span 2; }
+
+    .vhs-cell img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+      filter: saturate(0.9) contrast(1.05);
+    }
+
+    /* Static placeholder shown when no gif is loaded */
+    .vhs-cell .vhs-static {
+      position: absolute;
+      inset: 0;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .vhs-cell .vhs-static::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.07;
+      animation: staticShift 0.08s steps(1) infinite;
+    }
+
+    @keyframes staticShift {
+      0%   { background-position: 0 0; }
+      25%  { background-position: -10px 5px; }
+      50%  { background-position: 8px -3px; }
+      75%  { background-position: -5px 10px; }
+      100% { background-position: 3px -8px; }
+    }
+
+    .vhs-static-icon {
+      font-family: 'Oswald', sans-serif;
+      font-size: 8px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.12);
+      z-index: 1;
+    }
+
+    .vhs-static-plus {
+      font-size: 20px;
+      color: rgba(255,255,255,0.06);
+      z-index: 1;
+      line-height: 1;
+    }
+
+    /* Scanline + VHS overlay per cell */
+    .vhs-cell .vhs-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 2px,
+          rgba(0,0,0,0.04) 2px,
+          rgba(0,0,0,0.04) 3px
+        );
+    }
+
+    /* Chromatic aberration glitch on hover */
+    .vhs-cell:hover img {
+      transform: scale(1.02);
+    }
+
+    .vhs-cell:hover::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(255,0,60,0.04) 30%,
+        transparent 60%,
+        rgba(0,200,255,0.04) 80%,
+        transparent 100%
+      );
+      z-index: 6;
+      pointer-events: none;
+      animation: glitchLine 0.3s steps(2) both;
+    }
+
+    @keyframes glitchLine {
+      0%   { transform: translateY(0); opacity: 1; }
+      33%  { transform: translateY(-4px); opacity: 0.8; }
+      66%  { transform: translateY(3px); opacity: 0.9; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Track label watermark on each cell */
+    .vhs-cell .vhs-tag {
+      position: absolute;
+      bottom: 6px;
+      left: 8px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      z-index: 7;
+      pointer-events: none;
+      text-shadow: 0 0 8px rgba(0,0,0,0.8);
+    }
+
+    /* Timecode top-right */
+    .vhs-cell .vhs-timecode {
+      position: absolute;
+      top: 6px;
+      right: 7px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 7px;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.18);
+      z-index: 7;
+      pointer-events: none;
+    }
+
+    @media (min-width: 768px) {
+      .vhs-cell .vhs-tag,
+      .vhs-cell .vhs-timecode {
+        font-size: 11px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .vhs-cell .vhs-tag,
+      .vhs-cell .vhs-timecode {
+        font-size: 13px;
+      }
+    }
+
+    /* Horizontal glitch bar that sweeps down */
+    .vhs-cell .vhs-glitch-bar {
+      position: absolute;
+      left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      z-index: 8;
+      pointer-events: none;
+      animation: sweepDown var(--sweep-dur, 4s) linear infinite;
+      top: -4px;
+    }
+
+    @keyframes sweepDown {
+      0%   { top: -4px; opacity: 0; }
+      5%   { opacity: 1; }
+      95%  { opacity: 1; }
+      100% { top: 105%; opacity: 0; }
+    }
+
+    /* Vignette per cell */
+    .vhs-cell .vhs-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* ──────────────────────────────────────────
+       FADE-IN ANIMATIONS
+    ────────────────────────────────────────── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    .header { animation: fadeUp 0.6s ease both; }
-    .now-playing-label { animation: fadeUp 0.6s 0.1s ease both; }
-    .track-active { animation: fadeUp 0.6s 0.15s ease both; }
-    .player { animation: fadeUp 0.6s 0.2s ease both; }
-    .divider { animation: fadeUp 0.6s 0.25s ease both; }
-    .tracks-locked { animation: fadeUp 0.6s 0.3s ease both; }
-    .stamp-wrap { animation: fadeUp 0.6s 0.4s ease both; }
-    .footer { animation: fadeUp 0.6s 0.5s ease both; }
+    .view-album .header              { animation: fadeUp 0.6s ease both; }
+    .view-album .now-playing-label   { animation: fadeUp 0.6s 0.1s ease both; }
+    .view-album .track-active        { animation: fadeUp 0.6s 0.15s ease both; }
+    .view-album .player              { animation: fadeUp 0.6s 0.2s ease both; }
+    .view-album .divider             { animation: fadeUp 0.6s 0.25s ease both; }
+    .view-album .tracks-locked       { animation: fadeUp 0.6s 0.3s ease both; }
+    .view-album .stamp-wrap          { animation: fadeUp 0.6s 0.4s ease both; }
+    .view-album .footer              { animation: fadeUp 0.6s 0.5s ease both; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .vhs-view.visible { animation: fadeIn 0.4s ease both; }
   </style>
 </head>
-<body>
-  <div class="page">
+<body class="view-album">
 
-    <!-- <div class="top-quote">"Ko bildes nespēj, pateiks skaņas viļņi"</div> -->
+  <!-- ── VIEW SWITCHER ── -->
+  <div class="view-switcher">
+    <button id="btnAlbum" class="active" onclick="switchView('album')">PREVIEW</button>
+    <span class="sep">·</span>
+    <button id="btnVhs" onclick="switchView('vhs')">VHS</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ALBUM VIEW
+  ══════════════════════════════════════════ -->
+  <div class="page" id="albumView">
 
     <header class="header">
       <img class="album-title" src="assets/title.png" alt="Skaisti Dzīvot Neaizliegsi by Galaktik" style="max-width: 100%; height: auto;">
@@ -376,7 +730,6 @@
 
       <div class="player">
         <audio id="audio" preload="metadata">
-          <!-- Replace src below with your actual MP3 file path, e.g. src="taimings.mp3" -->
           <source src="assets/taimings.mp3">
         </audio>
 
@@ -463,7 +816,6 @@
 
     </div>
 
-    <!-- Vintage stamp decoration -->
     <div class="stamp-wrap">
       <img class="stamp" src="assets/stamp.png" alt="Vintage Stamp">
     </div>
@@ -476,19 +828,137 @@
 
   </div>
 
+  <!-- ══════════════════════════════════════════
+       VHS COLLAGE VIEW
+       Replace src="assets/clipN.mp4" with your
+       actual DaVinci exports.
+  ══════════════════════════════════════════ -->
+  <div class="vhs-view" id="vhsView">
+
+    <div class="vhs-header">
+      <span class="vhs-label">Galaktik — Skaisti Dzīvot Neaizliegsi ARCHIVE</span>
+      <span class="vhs-rec">
+        <span class="vhs-rec-dot"></span>
+        REC
+      </span>
+    </div>
+
+    <div class="vhs-grid" id="vhsGrid"></div><!-- filled by JS below -->
+  </div><!-- end .vhs-view -->
+
   <script>
-    const audio = document.getElementById('audio');
-    const playBtn = document.getElementById('playBtn');
-    const playIcon = document.getElementById('playIcon');
+    /* ══════════════════════════════════════════
+       ADD YOUR CLIPS HERE — one line per video
+       ratio options: 'ratio-wide span2' (full width 16:9)
+                      'ratio-4x3'        (half width 4:3)
+                      'ratio-square'     (half width 1:1)
+                      'ratio-tall'       (half width portrait)
+       dur = speed of the glitch line in seconds
+    ══════════════════════════════════════════ */
+    const clips = [
+      { src: 'assets/clips/clip1.mp4',  tag: 'CHILL',        timecode: '00:14:32', ratio: 'ratio-4x3', dur: 4  },
+      { src: 'assets/clips/clip2.mp4',  tag: 'MEGA CHILL',   timecode: '00:27:11', ratio: 'ratio-square',     dur: 2 },
+      { src: 'assets/clips/clip3.mp4',  tag: 'HEALTHY', timecode: '00:03:58', ratio: 'ratio-wide span2',     dur: 2  },
+      { src: 'assets/clips/clip4.mp4',  tag: 'MEGA CHILL PT.2',       timecode: '01:02:44', ratio: 'ratio-4x3',       dur: 8  },
+      { src: 'assets/clips/clip5.mp4',  tag: 'FLAMINGO',             timecode: '00:48:07', ratio: 'ratio-4x3',        dur: 9  },
+      { src: 'assets/clips/clip6.mp4',  tag: 'BARCELONA',        timecode: '00:31:19', ratio: 'ratio-tall', dur: 8  },
+      { src: 'assets/clips/clip7.mp4',  tag: 'GALAKTIK',        timecode: '00:09:53', ratio: 'ratio-wide span2',     dur: 9  },
+      { src: 'assets/clips/clip9.mp4',  tag: 'RITDIEN UZ MOLU CV AIZNEST', timecode: '00:22:38', ratio: 'ratio-square', dur: 3  },
+      { src: 'assets/clips/clip10.mp4', tag: 'MARKO CHILL',       timecode: '00:55:14', ratio: 'ratio-wide span2',        dur: 5  },
+      { src: 'assets/clips/clip11.mp4', tag: 'GALERY',             timecode: '00:07:29', ratio: 'ratio-tall',       dur: 11  },
+      { src: 'assets/clips/clip12.mp4', tag: 'TAIMINGS',        timecode: '01:33:47', ratio: 'ratio-4x3', dur: 7  },
+      { src: 'assets/clips/clip13.mp4', tag: 'GALAKTIK',        timecode: '00:41:06', ratio: 'ratio-square',     dur: 5  },
+      { src: 'assets/clips/clip14.mp4', tag: 'GALERY',   timecode: '00:18:55', ratio: 'ratio-wide span2',     dur: 6  },
+      { src: 'assets/clips/clip15.mp4', tag: 'PILNĪGS NEPRĀTS', timecode: '01:08:33', ratio: 'ratio-tall',       dur: 13  },
+      { src: 'assets/clips/clip16.mp4', tag: 'VINYL STORE',       timecode: '00:36:21', ratio: 'ratio-4x3',        dur: 14  },
+      { src: 'assets/clips/clip17.mp4', tag: 'MARKO CHILL PT.3',             timecode: '00:52:48', ratio: 'ratio-wide span2', dur: 7  },
+      { src: 'assets/clips/clip18.mp4', tag: 'SASHONS',        timecode: '00:11:17', ratio: 'ratio-square',     dur: 7  },
+      { src: 'assets/clips/clip19.mp4', tag: 'LONDON',        timecode: '01:24:09', ratio: 'ratio-square',     dur: 11 },
+      { src: 'assets/clips/clip20.mp4', tag: 'BLA BLA BLA',   timecode: '00:44:52', ratio: 'ratio-wide span2', dur: 5  },
+      { src: 'assets/clips/clip21.mp4', tag: 'MARKO X GALAKTIK @ VEF', timecode: '00:06:37', ratio: 'ratio-4x3',        dur: 8  },
+      { src: 'assets/clips/clip22.mp4', tag: 'ZZZZZ',       timecode: '00:29:03', ratio: 'ratio-tall',       dur: 6  },
+      { src: 'assets/clips/clip23.mp4', tag: 'RAKSTNIEKA ISTABA',             timecode: '01:41:28', ratio: 'ratio-wide span2',     dur: 3 },
+      { src: 'assets/clips/clip24.mp4', tag: 'BLA BLA BLA 2',        timecode: '00:58:16', ratio: 'ratio-square',     dur: 4 },
+      { src: 'assets/clips/clip25.mp4', tag: 'MARKO CHILL PT.2',        timecode: '00:33:44', ratio: 'ratio-wide span2', dur: 7  },
+    ];
+
+    /* ── Shuffle clips and guarantee no grid gaps ──
+       Half-width cells (no span2) must come in pairs.
+       Strategy: separate into full-width and half-width,
+       shuffle each, pair up the halves, then randomly
+       interleave all blocks back together. */
+    function buildLayout(clips) {
+      const arr = [...clips];
+
+      // Fisher-Yates shuffle
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+
+      const fulls  = arr.filter(c =>  c.ratio.includes('span2'));
+      const halves = arr.filter(c => !c.ratio.includes('span2'));
+
+      // If odd number of half-width clips, convert one to full-width
+      if (halves.length % 2 !== 0) {
+        const promoted = halves.splice(
+          Math.floor(Math.random() * halves.length), 1
+        )[0];
+        fulls.push({ ...promoted, ratio: 'ratio-wide span2' });
+      }
+
+      // Group halves into consecutive pairs
+      const pairs = [];
+      for (let i = 0; i < halves.length; i += 2) {
+        pairs.push([halves[i], halves[i + 1]]);
+      }
+
+      // Combine full-width singles and half-width pairs into blocks, then shuffle
+      const blocks = [
+        ...fulls.map(f => [f]),
+        ...pairs
+      ];
+      for (let i = blocks.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+      }
+
+      return blocks.flat();
+    }
+
+    /* Build the grid from the clips array */
+    const grid = document.getElementById('vhsGrid');
+    buildLayout(clips).forEach(clip => {
+      const cell = document.createElement('div');
+      cell.className = `vhs-cell ${clip.ratio}`;
+      cell.style.setProperty('--sweep-dur', clip.dur + 's');
+      cell.innerHTML = `
+        <video autoplay loop muted playsinline preload="none" data-lazy>
+          <source src="${clip.src}" type="video/mp4">
+        </video>
+        <div class="vhs-static">
+          <span class="vhs-static-plus">+</span>
+          <span class="vhs-static-icon">${clip.tag}</span>
+        </div>
+        <div class="vhs-overlay"></div>
+        <div class="vhs-vignette"></div>
+        <span class="vhs-timecode">${clip.timecode}</span>
+        <span class="vhs-tag">${clip.tag}</span>`;
+      grid.appendChild(cell);
+    });
+
+    /* ── Audio player ── */
+    const audio        = document.getElementById('audio');
+    const playBtn      = document.getElementById('playBtn');
+    const playIcon     = document.getElementById('playIcon');
     const progressFill = document.getElementById('progressFill');
-    const progressThumb = document.getElementById('progressThumb');
-    const progressTrack = document.getElementById('progressTrack');
-    const currentTimeEl = document.getElementById('currentTime');
-    const durationEl = document.getElementById('duration');
+    const progressThumb= document.getElementById('progressThumb');
+    const progressTrack= document.getElementById('progressTrack');
+    const currentTimeEl= document.getElementById('currentTime');
+    const durationEl   = document.getElementById('duration');
 
     const pausePathD = "M2 1H5V13H2V1ZM7 1H10V13H7V1Z";
-    const playPathD = "M1 1L11 7L1 13V1Z";
-
+    const playPathD  = "M1 1L11 7L1 13V1Z";
     let playing = false;
 
     function fmt(s) {
@@ -535,6 +1005,56 @@
       const pct = (e.clientX - rect.left) / rect.width;
       audio.currentTime = pct * audio.duration;
     });
+
+    /* ── View switcher ── */
+    const albumView = document.getElementById('albumView');
+    const vhsView   = document.getElementById('vhsView');
+    const btnAlbum  = document.getElementById('btnAlbum');
+    const btnVhs    = document.getElementById('btnVhs');
+
+    function switchView(v) {
+      if (v === 'album') {
+        document.body.className = 'view-album';
+        document.body.style.background = '';
+        albumView.style.display = '';
+        vhsView.style.display   = 'none';
+        vhsView.classList.remove('visible');
+        btnAlbum.classList.add('active');
+        btnVhs.classList.remove('active');
+      } else {
+        document.body.className = 'view-vhs';
+        albumView.style.display = 'none';
+        vhsView.style.display   = 'block'; /* 'block' not '' — '' falls back to CSS display:none */
+        requestAnimationFrame(() => vhsView.classList.add('visible'));
+        btnVhs.classList.add('active');
+        btnAlbum.classList.remove('active');
+        lazyVideos.forEach(v => videoObserver.observe(v));
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── Lazy-load videos when they scroll into view ── */
+    /* querySelectorAll runs after grid.appendChild above, so it catches all 25 videos */
+    const lazyVideos = document.querySelectorAll('video[data-lazy]');
+
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const video = entry.target;
+        video.addEventListener('canplay', () => {
+          video.style.opacity = '1';
+          const placeholder = video.nextElementSibling;
+          if (placeholder && placeholder.classList.contains('vhs-static')) {
+            placeholder.style.display = 'none';
+          }
+        }, { once: true });
+        video.load();
+        video.play().catch(() => {});
+        videoObserver.unobserve(video);
+      });
+    }, { rootMargin: '100px' });
+
+    lazyVideos.forEach(v => videoObserver.observe(v));
   </script>
 </body>
 </html>
